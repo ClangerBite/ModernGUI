@@ -24,10 +24,11 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-from modules import *
+#from modules import *
 from widgets.custom_grips import CustomGrip
 # APP SETTINGS
 from modules.app_settings import Settings
+from modules.app_functions import *
 
 # GUI FILE
 from modules.ui_main import Ui_MainWindow
@@ -102,7 +103,7 @@ class MainWindow(QMainWindow):
         # SET CUSTOM THEME
         # ///////////////////////////////////////////////////////////////
         useCustomTheme = False
-        themeFile = "themes\py_dracula_light.qss"
+        themeFile = "Modern_GUI\\themes\\py_dracula_light.qss"
 
         # SET THEME AND HACKS
         if useCustomTheme:
