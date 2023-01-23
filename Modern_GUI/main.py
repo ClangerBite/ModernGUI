@@ -20,12 +20,24 @@ import platform
 
 # IMPORT / GUI AND MODULES AND WIDGETS
 # ///////////////////////////////////////////////////////////////
+from PySide6.QtCore import *
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+
 from modules import *
 from widgets.custom_grips import CustomGrip
+# APP SETTINGS
+from modules.app_settings import Settings
+
+# GUI FILE
+from modules.ui_main import Ui_MainWindow
+
 os.environ["QT_FONT_DPI"] = "96" # FIX Problem for High DPI and Scale above 100%
 
 # SET AS GLOBAL WIDGETS
 # ///////////////////////////////////////////////////////////////
+GLOBAL_STATE = False
+GLOBAL_TITLE_BAR = True
 widgets = None
 
 class MainWindow(QMainWindow):
@@ -53,11 +65,11 @@ class MainWindow(QMainWindow):
 
         # TOGGLE MENU
         # ///////////////////////////////////////////////////////////////
-        widgets.toggleButton.clicked.connect(lambda: UIFunctions.toggleMenu(self, True))
+        widgets.toggleButton.clicked.connect(lambda: self.toggleMenu(True))
 
         # SET UI DEFINITIONS
         # ///////////////////////////////////////////////////////////////
-        UIFunctions.uiDefinitions(self)
+        self.uiDefinitions()
 
         # QTableWidget PARAMETERS
         # ///////////////////////////////////////////////////////////////
@@ -74,13 +86,13 @@ class MainWindow(QMainWindow):
 
         # EXTRA LEFT BOX
         def openCloseLeftBox():
-            UIFunctions.toggleLeftBox(self, True)
+            self.toggleLeftBox(True)
         widgets.toggleLeftBox.clicked.connect(openCloseLeftBox)
         widgets.extraCloseColumnBtn.clicked.connect(openCloseLeftBox)
 
         # EXTRA RIGHT BOX
         def openCloseRightBox():
-            UIFunctions.toggleRightBox(self, True)
+            self.toggleRightBox(True)
         widgets.settingsTopBtn.clicked.connect(openCloseRightBox)
 
         # SHOW APP
@@ -95,7 +107,7 @@ class MainWindow(QMainWindow):
         # SET THEME AND HACKS
         if useCustomTheme:
             # LOAD AND APPLY STYLE
-            UIFunctions.theme(self, themeFile, True)
+            self.theme(themeFile, True)
 
             # SET HACKS
             AppFunctions.setThemeHack(self)
@@ -103,7 +115,7 @@ class MainWindow(QMainWindow):
         # SET HOME PAGE AND SELECT MENU
         # ///////////////////////////////////////////////////////////////
         widgets.stackedWidget.setCurrentWidget(widgets.home)
-        widgets.btn_home.setStyleSheet(UIFunctions.selectMenu(widgets.btn_home.styleSheet()))
+        widgets.btn_home.setStyleSheet(self.selectMenu(widgets.btn_home.styleSheet()))
 
 
     # BUTTONS CLICK
@@ -117,20 +129,20 @@ class MainWindow(QMainWindow):
         # SHOW HOME PAGE
         if btnName == "btn_home":
             widgets.stackedWidget.setCurrentWidget(widgets.home)
-            UIFunctions.resetStyle(self, btnName)
-            btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
+            self.resetStyle(btnName)
+            btn.setStyleSheet(self.selectMenu(btn.styleSheet()))
 
         # SHOW WIDGETS PAGE
         if btnName == "btn_widgets":
             widgets.stackedWidget.setCurrentWidget(widgets.widgets)
-            UIFunctions.resetStyle(self, btnName)
-            btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet()))
+            self.resetStyle(btnName)
+            btn.setStyleSheet(self.selectMenu(btn.styleSheet()))
 
         # SHOW NEW PAGE
         if btnName == "btn_new":
             widgets.stackedWidget.setCurrentWidget(widgets.new_page) # SET PAGE
-            UIFunctions.resetStyle(self, btnName) # RESET ANOTHERS BUTTONS SELECTED
-            btn.setStyleSheet(UIFunctions.selectMenu(btn.styleSheet())) # SELECT MENU
+            self.resetStyle(btnName) # RESET ANOTHERS BUTTONS SELECTED
+            btn.setStyleSheet(self.selectMenu(btn.styleSheet())) # SELECT MENU
 
         if btnName == "btn_save":
             print("Save BTN clicked!")
@@ -143,7 +155,7 @@ class MainWindow(QMainWindow):
     # ///////////////////////////////////////////////////////////////
     def resizeEvent(self, event):
         # Update Size Grips
-        UIFunctions.resize_grips(self)
+        self.resize_grips()
 
     # MOUSE CLICK EVENTS
     # ///////////////////////////////////////////////////////////////
@@ -158,10 +170,10 @@ class MainWindow(QMainWindow):
             print('Mouse click: RIGHT CLICK')
             
             
-GLOBAL_STATE = False
-GLOBAL_TITLE_BAR = True
+        # GUI FUNCTIONS
+        # ///////////////////////////////////////////////////////////////
 
-class UIFunctions(MainWindow):
+#class UIFunctions(MainWindow):
     # MAXIMIZE/RESTORE
     # ///////////////////////////////////////////////////////////////
     def maximize_restore(self):
@@ -252,7 +264,7 @@ class UIFunctions(MainWindow):
                 # RESET BTN
                 self.ui.toggleLeftBox.setStyleSheet(style.replace(color, ''))
                 
-        UIFunctions.start_box_animation(self, width, widthRightBox, "left")
+        self.start_box_animation(width, widthRightBox, "left")
 
     # TOGGLE RIGHT BOX
     # ///////////////////////////////////////////////////////////////
@@ -281,7 +293,7 @@ class UIFunctions(MainWindow):
                 # RESET BTN
                 self.ui.settingsTopBtn.setStyleSheet(style.replace(color, ''))
 
-            UIFunctions.start_box_animation(self, widthLeftBox, width, "right")
+            self.start_box_animation(widthLeftBox, width, "right")
 
     def start_box_animation(self, left_box_width, right_box_width, direction):
         right_width = 0
@@ -321,12 +333,12 @@ class UIFunctions(MainWindow):
     # SELECT/DESELECT MENU
     # ///////////////////////////////////////////////////////////////
     # SELECT
-    def selectMenu(getStyle):
+    def selectMenu(self, getStyle):
         select = getStyle + Settings.MENU_SELECTED_STYLESHEET
         return select
 
     # DESELECT
-    def deselectMenu(getStyle):
+    def deselectMenu(self, getStyle):
         deselect = getStyle.replace(Settings.MENU_SELECTED_STYLESHEET, "")
         return deselect
 
@@ -334,13 +346,13 @@ class UIFunctions(MainWindow):
     def selectStandardMenu(self, widget):
         for w in self.ui.topMenu.findChildren(QPushButton):
             if w.objectName() == widget:
-                w.setStyleSheet(UIFunctions.selectMenu(w.styleSheet()))
+                w.setStyleSheet(self.selectMenu(w.styleSheet()))
 
     # RESET SELECTION
     def resetStyle(self, widget):
         for w in self.ui.topMenu.findChildren(QPushButton):
             if w.objectName() != widget:
-                w.setStyleSheet(UIFunctions.deselectMenu(w.styleSheet()))
+                w.setStyleSheet(self.deselectMenu(w.styleSheet()))
 
     # IMPORT THEMES FILES QSS/CSS
     # ///////////////////////////////////////////////////////////////
@@ -355,7 +367,7 @@ class UIFunctions(MainWindow):
         def dobleClickMaximizeRestore(event):
             # IF DOUBLE CLICK CHANGE STATUS
             if event.type() == QEvent.MouseButtonDblClick:
-                QTimer.singleShot(250, lambda: UIFunctions.maximize_restore(self))
+                QTimer.singleShot(250, self.maximize_restore)
         self.ui.titleRightInfo.mouseDoubleClickEvent = dobleClickMaximizeRestore
 
         if Settings.ENABLE_CUSTOM_TITLE_BAR:
@@ -366,8 +378,8 @@ class UIFunctions(MainWindow):
             # MOVE WINDOW / MAXIMIZE / RESTORE
             def moveWindow(event):
                 # IF MAXIMIZED CHANGE TO NORMAL
-                if UIFunctions.returStatus(self):
-                    UIFunctions.maximize_restore(self)
+                if self.returStatus():
+                    self.maximize_restore()
                 # MOVE WINDOW
                 if event.buttons() == Qt.LeftButton:
                     self.move(self.pos() + event.globalPos() - self.dragPos)
@@ -401,13 +413,13 @@ class UIFunctions(MainWindow):
         self.sizegrip.setStyleSheet("width: 20px; height: 20px; margin 0px; padding: 0px;")
 
         # MINIMIZE
-        self.ui.minimizeAppBtn.clicked.connect(lambda: self.showMinimized())
+        self.ui.minimizeAppBtn.clicked.connect(self.showMinimized)
 
         # MAXIMIZE/RESTORE
-        self.ui.maximizeRestoreAppBtn.clicked.connect(lambda: UIFunctions.maximize_restore(self))
+        self.ui.maximizeRestoreAppBtn.clicked.connect(self.maximize_restore)
 
         # CLOSE APPLICATION
-        self.ui.closeAppBtn.clicked.connect(lambda: self.close())
+        self.ui.closeAppBtn.clicked.connect(self.close)
 
     def resize_grips(self):
         if Settings.ENABLE_CUSTOM_TITLE_BAR:

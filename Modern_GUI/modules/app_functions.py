@@ -16,6 +16,11 @@
 
 # MAIN FILE
 # ///////////////////////////////////////////////////////////////
+from PySide6.QtCore import *
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
+
+from . app_settings import Settings
 from main import *
 
 # WITH ACCESS TO MAIN WINDOW WIDGETS
