@@ -24,7 +24,7 @@ from . ui_main import Ui_MainWindow
 from . app_settings import Settings
 
 # IMPORT FUNCTIONS
-from . ui_functions import *
+#from . ui_functions import *
 
 # APP FUNCTIONS
 from . app_functions import *
