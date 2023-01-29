@@ -16,7 +16,6 @@
 
 import sys
 import os
-import platform
 
 # IMPORT / GUI AND MODULES AND WIDGETS
 # ///////////////////////////////////////////////////////////////

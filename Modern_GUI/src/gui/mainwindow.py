@@ -32,11 +32,9 @@ from src.qtdesigner.ui_mainwindow import Ui_MainWindow
 #FIXME Inherit from GUI instead
 
 
-os.environ["QT_FONT_DPI"] = "96" # FIX Problem for High DPI and Scale above 100%
-
 # SET AS GLOBAL WIDGETS
 # ///////////////////////////////////////////////////////////////
-GLOBAL_STATE = False
+
 widgets = None
 
 class MainWindow(QMainWindow):
@@ -50,10 +48,6 @@ class MainWindow(QMainWindow):
         global widgets
         widgets = self.ui
 
-        # USE CUSTOM TITLE BAR | USE AS "False" FOR MAC OR LINUX
-        # ///////////////////////////////////////////////////////////////
-        Settings.ENABLE_CUSTOM_TITLE_BAR = True
-
         # APP NAME
         # ///////////////////////////////////////////////////////////////
         title = "PyDracula - Modern GUI"
@@ -62,37 +56,34 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(title)
         widgets.titleRightInfo.setText(description)
 
-        # TOGGLE MENU
-        # ///////////////////////////////////////////////////////////////
-        widgets.toggleButton.clicked.connect(lambda: self.toggleMenu(True))
-
         # SET UI DEFINITIONS
         # ///////////////////////////////////////////////////////////////
         self.uiDefinitions()
+        self.MAXIMISED_WINDOW = False
 
         # QTableWidget PARAMETERS
         # ///////////////////////////////////////////////////////////////
         widgets.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        
+        # WINDOW BUTTONS - MINIMIZE, MAXIMIZE/RESTORE & CLOSE
+        self.ui.minimizeAppBtn.clicked.connect(self.showMinimized)
+        self.ui.maximizeRestoreAppBtn.clicked.connect(self.maximize_restore)
+        self.ui.closeAppBtn.clicked.connect(self.close)
 
-        # BUTTONS CLICK
-        # ///////////////////////////////////////////////////////////////
+        # MENU BUTTONS (LEFT)
+        widgets.toggleButton.clicked.connect(self.toggleMenu)
+        widgets.btn_home.clicked.connect(self.menuButtonClick)
+        widgets.btn_widgets.clicked.connect(self.menuButtonClick)
+        widgets.btn_new.clicked.connect(self.menuButtonClick)
+        widgets.btn_save.clicked.connect(self.menuButtonClick)
 
-        # LEFT MENUS
-        widgets.btn_home.clicked.connect(self.buttonClick)
-        widgets.btn_widgets.clicked.connect(self.buttonClick)
-        widgets.btn_new.clicked.connect(self.buttonClick)
-        widgets.btn_save.clicked.connect(self.buttonClick)
-
-        # EXTRA LEFT BOX
+        # TOGGLE BOX PANELS (LEFT & RIGHT)
         widgets.toggleLeftBox.clicked.connect(self.toggleLeftBox)
         widgets.extraCloseColumnBtn.clicked.connect(self.toggleLeftBox)
-
-        # EXTRA RIGHT BOX
         widgets.settingsTopBtn.clicked.connect(self.toggleRightBox)
+        
+        
 
-        # SHOW APP
-        # ///////////////////////////////////////////////////////////////
-        self.show()
 
         # SET CUSTOM THEME
         # ///////////////////////////////////////////////////////////////
@@ -111,40 +102,13 @@ class MainWindow(QMainWindow):
         # SET HOME PAGE AND SELECT MENU
         # ///////////////////////////////////////////////////////////////
         widgets.stackedWidget.setCurrentWidget(widgets.home)
-        widgets.btn_home.setStyleSheet(self.selectMenu(widgets.btn_home.styleSheet()))
+        widgets.btn_home.setStyleSheet(self.highlightMenuItem(widgets.btn_home.styleSheet()))
+        
+        
+        self.show()
 
 
-    # BUTTONS CLICK
-    # Post here your functions for clicked buttons
-    # ///////////////////////////////////////////////////////////////
-    def buttonClick(self):
-        # GET BUTTON CLICKED
-        btn = self.sender()
-        btnName = btn.objectName()
-
-        # SHOW HOME PAGE
-        if btnName == "btn_home":
-            widgets.stackedWidget.setCurrentWidget(widgets.home)
-            self.resetStyle(btnName)
-            btn.setStyleSheet(self.selectMenu(btn.styleSheet()))
-
-        # SHOW WIDGETS PAGE
-        if btnName == "btn_widgets":
-            widgets.stackedWidget.setCurrentWidget(widgets.widgets)
-            self.resetStyle(btnName)
-            btn.setStyleSheet(self.selectMenu(btn.styleSheet()))
-
-        # SHOW NEW PAGE
-        if btnName == "btn_new":
-            widgets.stackedWidget.setCurrentWidget(widgets.new_page) # SET PAGE
-            self.resetStyle(btnName) # RESET ANOTHERS BUTTONS SELECTED
-            btn.setStyleSheet(self.selectMenu(btn.styleSheet())) # SELECT MENU
-
-        if btnName == "btn_save":
-            print("Save BTN clicked!")
-
-        # PRINT BTN NAME
-        print(f'Button "{btnName}" pressed!')
+   
 
 
     # RESIZE EVENTS
@@ -169,72 +133,66 @@ class MainWindow(QMainWindow):
             
             
             
-    # GUI FUNCTIONS        
-            
-    # MAXIMIZE/RESTORE
+
+
+    # MENU FUNCTIONS (LEFT)
     # ///////////////////////////////////////////////////////////////
-    def maximize_restore(self):
-        global GLOBAL_STATE
-        status = GLOBAL_STATE
-        if status == False:
-            self.showMaximized()
-            GLOBAL_STATE = True
-            self.ui.appMargins.setContentsMargins(0, 0, 0, 0)
-            self.ui.maximizeRestoreAppBtn.setToolTip("Restore")
-            self.ui.maximizeRestoreAppBtn.setIcon(QIcon(u":/icons/images/icons/icon_restore.png"))
-            self.ui.frame_size_grip.hide()
-            self.left_grip.hide()
-            self.right_grip.hide()
-            self.top_grip.hide()
-            self.bottom_grip.hide()
+    def menuButtonClick(self):
+        # GET MENU BUTTON CLICKED
+        btn = self.sender()
+        btnName = btn.objectName()
+
+        # SHOW HOME PAGE
+        if btnName == "btn_home":
+            widgets.stackedWidget.setCurrentWidget(widgets.home) # SET PAGE
+            btn.setStyleSheet(self.highlightMenuItem(btn.styleSheet())) # RESET MENU BACKGROUNDS
+
+        # SHOW WIDGETS PAGE
+        if btnName == "btn_widgets":
+            widgets.stackedWidget.setCurrentWidget(widgets.widgets)
+            btn.setStyleSheet(self.highlightMenuItem(btn.styleSheet()))
+
+        # SHOW NEW PAGE
+        if btnName == "btn_new":
+            widgets.stackedWidget.setCurrentWidget(widgets.new_page)
+            btn.setStyleSheet(self.highlightMenuItem(btn.styleSheet()))
+
+        if btnName == "btn_save":
+            print("Save BTN clicked!")
+
+        # PRINT BTN NAME
+        print(f'Button "{btnName}" pressed!')
+    
+    def toggleMenu(self):
+        # GET WIDTH
+        width = self.ui.leftMenuBg.width()
+        maxExtend = Settings.MENU_WIDTH
+        standard = 60
+
+        # SET MAX WIDTH
+        if width == 60:
+            widthExtended = maxExtend
         else:
-            GLOBAL_STATE = False
-            self.showNormal()
-            self.resize(self.width()+1, self.height()+1)
-            self.ui.appMargins.setContentsMargins(10, 10, 10, 10)
-            self.ui.maximizeRestoreAppBtn.setToolTip("Maximize")
-            self.ui.maximizeRestoreAppBtn.setIcon(QIcon(u":/icons/images/icons/icon_maximize.png"))
-            self.ui.frame_size_grip.show()
-            self.left_grip.show()
-            self.right_grip.show()
-            self.top_grip.show()
-            self.bottom_grip.show()
+            widthExtended = standard
 
-    # RETURN STATUS
-    # ///////////////////////////////////////////////////////////////
-    def returStatus(self):
-        return GLOBAL_STATE
+        # ANIMATION
+        self.animation = QPropertyAnimation(self.ui.leftMenuBg, b"minimumWidth")
+        self.animation.setDuration(Settings.TIME_ANIMATION)
+        self.animation.setStartValue(width)
+        self.animation.setEndValue(widthExtended)
+        self.animation.setEasingCurve(QEasingCurve.InOutQuart)
+        self.animation.start()
 
-    # SET STATUS
-    # ///////////////////////////////////////////////////////////////
-    def setStatus(self, status):
-        global GLOBAL_STATE
-        GLOBAL_STATE = status
-
-    # TOGGLE MENU
-    # ///////////////////////////////////////////////////////////////
-    def toggleMenu(self, enable):
-        if enable:
-            # GET WIDTH
-            width = self.ui.leftMenuBg.width()
-            maxExtend = Settings.MENU_WIDTH
-            standard = 60
-
-            # SET MAX WIDTH
-            if width == 60:
-                widthExtended = maxExtend
-            else:
-                widthExtended = standard
-
-            # ANIMATION
-            self.animation = QPropertyAnimation(self.ui.leftMenuBg, b"minimumWidth")
-            self.animation.setDuration(Settings.TIME_ANIMATION)
-            self.animation.setStartValue(width)
-            self.animation.setEndValue(widthExtended)
-            self.animation.setEasingCurve(QEasingCurve.InOutQuart)
-            self.animation.start()
-
-    # TOGGLE BOXES
+    def highlightMenuItem(self, getStyle):
+        # RESET BACKGROUND FOR ALL MENU ITEMS        
+        for w in self.ui.topMenu.findChildren(QPushButton):
+            deselect = w.styleSheet().replace(Settings.MENU_SELECTED_STYLESHEET, "")
+            w.setStyleSheet(deselect)
+        # GET THE STYLESHEET FOR THE SELECTED BUTTON                    
+        select = getStyle + Settings.MENU_SELECTED_STYLESHEET
+        return select
+       
+    # TOGGLE BOX PANELS (LEFT & RIGHT)
     # ///////////////////////////////////////////////////////////////
     def toggleLeftBox(self):
         # GET WIDTH
@@ -260,7 +218,7 @@ class MainWindow(QMainWindow):
             # RESET BTN
             self.ui.toggleLeftBox.setStyleSheet(style.replace(color, ''))
                 
-        self.box_animation(width, widthRightBox, "left")
+        self.boxAnimation(width, widthRightBox, "left")
 
     def toggleRightBox(self):
         # GET WIDTH
@@ -284,9 +242,9 @@ class MainWindow(QMainWindow):
             # RESET BTN
             self.ui.settingsTopBtn.setStyleSheet(style.replace(color, ''))
 
-        self.box_animation(widthLeftBox, width, "right")
+        self.boxAnimation(widthLeftBox, width, "right")
 
-    def box_animation(self, left_box_width, right_box_width, direction):
+    def boxAnimation(self, left_box_width, right_box_width, direction):
         right_width = 0
         left_width = 0 
 
@@ -321,29 +279,6 @@ class MainWindow(QMainWindow):
         self.group.addAnimation(self.right_box)
         self.group.start()
 
-    # SELECT/DESELECT MENU
-    # ///////////////////////////////////////////////////////////////
-    # SELECT
-    def selectMenu(self, getStyle):
-        select = getStyle + Settings.MENU_SELECTED_STYLESHEET
-        return select
-
-    # DESELECT
-    def deselectMenu(self, getStyle):
-        deselect = getStyle.replace(Settings.MENU_SELECTED_STYLESHEET, "")
-        return deselect
-
-    # START SELECTION
-    def selectStandardMenu(self, widget):
-        for w in self.ui.topMenu.findChildren(QPushButton):
-            if w.objectName() == widget:
-                w.setStyleSheet(self.selectMenu(w.styleSheet()))
-
-    # RESET SELECTION
-    def resetStyle(self, widget):
-        for w in self.ui.topMenu.findChildren(QPushButton):
-            if w.objectName() != widget:
-                w.setStyleSheet(self.deselectMenu(w.styleSheet()))
 
     # IMPORT THEMES FILES QSS/CSS
     # ///////////////////////////////////////////////////////////////
@@ -362,14 +297,14 @@ class MainWindow(QMainWindow):
         self.ui.titleRightInfo.mouseDoubleClickEvent = doubleClickMaximizeRestore
 
         if Settings.ENABLE_CUSTOM_TITLE_BAR:
-            #STANDARD TITLE BAR
+            # REMOVE STANDARD TITLE BAR
             self.setWindowFlags(Qt.FramelessWindowHint)
             self.setAttribute(Qt.WA_TranslucentBackground)
 
             # MOVE WINDOW / MAXIMIZE / RESTORE
             def moveWindow(event):
                 # IF MAXIMIZED CHANGE TO NORMAL
-                if self.returStatus():
+                if self.MAXIMISED_WINDOW:
                     self.maximize_restore()
                 # MOVE WINDOW
                 if event.buttons() == Qt.LeftButton:
@@ -403,14 +338,36 @@ class MainWindow(QMainWindow):
         self.sizegrip = QSizeGrip(self.ui.frame_size_grip)
         self.sizegrip.setStyleSheet("width: 20px; height: 20px; margin 0px; padding: 0px;")
 
-        # MINIMIZE
-        self.ui.minimizeAppBtn.clicked.connect(self.showMinimized)
 
-        # MAXIMIZE/RESTORE
-        self.ui.maximizeRestoreAppBtn.clicked.connect(self.maximize_restore)
-
-        # CLOSE APPLICATION
-        self.ui.closeAppBtn.clicked.connect(self.close)
+    def maximize_restore(self):
+        if not self.MAXIMISED_WINDOW:
+            self.showMaximized()
+            self.MAXIMISED_WINDOW = True
+            self.ui.appMargins.setContentsMargins(0, 0, 0, 0)
+            self.ui.maximizeRestoreAppBtn.setToolTip("Restore")
+            self.ui.maximizeRestoreAppBtn.setIcon(QIcon(u":/icons/images/icons/icon_restore.png"))
+            self.ui.frame_size_grip.hide()
+            self.left_grip.hide()
+            self.right_grip.hide()
+            self.top_grip.hide()
+            self.bottom_grip.hide()
+        else:
+            self.MAXIMISED_WINDOW = False
+            self.showNormal()
+            self.resize(self.width()+1, self.height()+1)
+            self.ui.appMargins.setContentsMargins(10, 10, 10, 10)
+            self.ui.maximizeRestoreAppBtn.setToolTip("Maximize")
+            self.ui.maximizeRestoreAppBtn.setIcon(QIcon(u":/icons/images/icons/icon_maximize.png"))
+            self.ui.frame_size_grip.show()
+            self.left_grip.show()
+            self.right_grip.show()
+            self.top_grip.show()
+            self.bottom_grip.show()
+        
+        
+        
+        
+        
 
     def resize_grips(self):
         if Settings.ENABLE_CUSTOM_TITLE_BAR:
