@@ -21,7 +21,8 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 from . app_settings import Settings
-from main import *
+#from main import *
+from src.gui.mainwindow import MainWindow
 
 # WITH ACCESS TO MAIN WINDOW WIDGETS
 # ///////////////////////////////////////////////////////////////
