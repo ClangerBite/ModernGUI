@@ -17,23 +17,17 @@
 import sys
 import os
 
-# IMPORT / GUI AND MODULES AND WIDGETS
-# ///////////////////////////////////////////////////////////////
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication
 
-
-
-# GUI FILE
-from src.gui.mainwindow import MainWindow
+#from src.gui.mainwindow import MainWindow
+from src.gui.splashscreen import SplashScreen
 
 os.environ["QT_FONT_DPI"] = "96" # FIX Problem for High DPI and Scale above 100%
-
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("icon.ico"))
-    window = MainWindow()
+    window = SplashScreen()
     sys.exit(app.exec())

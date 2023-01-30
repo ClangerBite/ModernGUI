@@ -20,8 +20,7 @@ from PySide6.QtCore import *
 from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
-from . app_settings import Settings
-#from main import *
+from .app_settings import Settings
 from src.gui.mainwindow import MainWindow
 
 # WITH ACCESS TO MAIN WINDOW WIDGETS
@@ -45,3 +44,22 @@ class AppFunctions(MainWindow):
         self.ui.horizontalScrollBar.setStyleSheet("background-color: #6272a4;")
         self.ui.verticalScrollBar.setStyleSheet("background-color: #6272a4;")
         self.ui.commandLinkButton.setStyleSheet("color: #ff79c6;")
+        
+    
+    # IMPORT THEMES FILES QSS/CSS
+    # ///////////////////////////////////////////////////////////////
+    def setCustomTheme(self):
+        
+        useCustomTheme = False
+        themeFile1 = "Modern_GUI\\themes\\py_dracula_light.qss"
+        themeFile2 = "Modern_GUI\\themes\\py_dracula_dark.qss"
+        
+        # SET THEME AND HACKS
+        if useCustomTheme:
+            # LOAD AND APPLY STYLE
+            str = open(themeFile1, 'r').read()
+            self.ui.styleSheet.setStyleSheet(str)
+
+            # SET HACKS
+            #AppFunctions.setThemeHack(self)
+            # FIXME Inherit rather than circular call
